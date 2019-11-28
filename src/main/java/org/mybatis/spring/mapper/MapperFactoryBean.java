@@ -60,7 +60,7 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
   public MapperFactoryBean() {
     // intentionally empty
   }
-
+  //因为在BeanDefinition中添加了mapper接口的名字，所以spring在实例化时会调用这个构造方法创建对象
   public MapperFactoryBean(Class<T> mapperInterface) {
     this.mapperInterface = mapperInterface;
   }
@@ -71,12 +71,14 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
   @Override
   protected void checkDaoConfig() {
     super.checkDaoConfig();
-
+    //mapperInterface不能为空
     notNull(this.mapperInterface, "Property 'mapperInterface' is required");
 
+    //获取mybatis配置
     Configuration configuration = getSqlSession().getConfiguration();
     if (this.addToConfig && !configuration.hasMapper(this.mapperInterface)) {
       try {
+        //将mapperInterface添加到mybatis配置类
         configuration.addMapper(this.mapperInterface);
       } catch (Exception e) {
         logger.error("Error while adding the mapper '" + this.mapperInterface + "' to configuration.", e);
@@ -92,6 +94,7 @@ public class MapperFactoryBean<T> extends SqlSessionDaoSupport implements Factor
    */
   @Override
   public T getObject() throws Exception {
+    //调用SqlSession的getMapper()方法获取mapper代理，也就是MapperProxy，这里的SqlSession其实是sqlSessionTemplate
     return getSqlSession().getMapper(this.mapperInterface);
   }
 
